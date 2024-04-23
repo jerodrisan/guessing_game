@@ -35,10 +35,19 @@ then
           read GUESS_NUMBER            
       fi
    done
+   CONTA=$((CONTA+1))
    echo -e "You guessed it in $CONTA tries. The secret number was $NUMBER." 
+
+   #Metemos en la tabla games un nuevo registro con el numero de partidos jugados (en este caso 1 ya que es el primero), el numero de intentos y el user_id
+   INSERT_DATA=$($PSQL "insert into games (user_id, games_played, guesses) values ((select id from users where username='$NAME'),1,$CONTA)") 
+
 
 #En caso de que el usuario ya este registrado en la base de datos, 
 else 
+    #Sacamos el numero de partidas que lleva jugadas y la mejor puntuacion de todas las que lleva. 
+    #echo -e "\nWelcome back, <username>! You have played <games_played> games, and your best game took <best_game> guesses."
+
+    
 
 fi
 
