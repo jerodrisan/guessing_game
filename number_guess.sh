@@ -2,23 +2,12 @@
 
 PSQL="psql --username=freecodecamp --dbname=number_guess -t --no-align -c"
 
-NUMBER=$(( RANDOM % 10 + 1))
 
-echo -e "\nEnter your username:\n"
+#Funcion para leer los datos de entrada :
+READ_NUMBER() {
 
-read NAME
-
-USER=$($PSQL "select username from users where username='$NAME'")
-
-if [[ -z $USER ]]
-then 
-    #Si no esta el usuario, lo metemos en la base de datos:     
-    INSERT_USER=$($PSQL "insert into users (username) values ('$NAME')")
-    echo -e "\nWelcome, $NAME! It looks like this is your first time here."
-    echo -e "\nGuess the secret number between 1 and 1000:"
-
+   echo -e "\nGuess the secret number between 1 and 1000:"
    read GUESS_NUMBER
-
    CONTA=0 #creamos un contador para saber los intentos hasta que se adivina el numero:
    while [[ $GUESS_NUMBER -ne $NUMBER ]]
    do
@@ -37,19 +26,40 @@ then
    done
    CONTA=$((CONTA+1))
    echo -e "You guessed it in $CONTA tries. The secret number was $NUMBER." 
+  
 
-   #Metemos en la tabla games un nuevo registro con el numero de partidos jugados (en este caso 1 ya que es el primero), el numero de intentos y el user_id
-   INSERT_DATA=$($PSQL "insert into games (user_id, games_played, guesses) values ((select id from users where username='$NAME'),1,$CONTA)") 
+}
+
+
+NUMBER=$(( RANDOM % 10 + 1))
+
+echo -e "\nEnter your username:\n"
+
+read NAME
+
+USER=$($PSQL "select username from users where username='$NAME'")
+
+if [[ -z $USER ]]
+then 
+    #Si no esta el usuario, lo metemos en la base de datos:     
+    INSERT_USER=$($PSQL "insert into users (username) values ('$NAME')")
+    echo -e "\nWelcome, $NAME! It looks like this is your first time here."
+
+    READ_NUMBER
+
+    #Metemos en la tabla games un nuevo registro con el numero de partidos jugados (en este caso 1 ya que es el primero), el numero de intentos y el user_id
+    INSERT_DATA=$($PSQL "insert into games (user_id, games_played, guesses) values ((select id from users where username='$NAME'),1,$CONTA)") 
 
 
 #En caso de que el usuario ya este registrado en la base de datos, 
 else 
     #Sacamos el numero de partidas que lleva jugadas y la mejor puntuacion de todas las que lleva. 
     #echo -e "\nWelcome back, <username>! You have played <games_played> games, and your best game took <best_game> guesses."
-
+    echo -e "\nWelcome back, $USER guesses."
     
 
 fi
+
 
 
 
