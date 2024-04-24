@@ -14,21 +14,21 @@ READ_NUMBER() {
       if [[ $GUESS_NUMBER -gt $NUMBER ]]
       then
           CONTA=$((CONTA+1))
-          echo -e "\nIt's lower than that ($NUMBER), guess again: number of counts: $CONTA"
+          echo -e "\nIt's lower than that, guess again:"
           read GUESS_NUMBER   
 
       elif [[ $GUESS_NUMBER -lt $NUMBER ]]      
       then       
           CONTA=$((CONTA+1))
-          echo -e "\nIt's higher than that ($NUMBER), guess again:  number of counts: $CONTA"
+          echo -e "\nIt's higher than that, guess again:"
           read GUESS_NUMBER            
       fi
    done
    CONTA=$((CONTA+1))
-   echo -e "You guessed it in $CONTA tries. The secret number was $NUMBER." 
-  
-
+   echo -e "\nYou guessed it in $CONTA tries. The secret number was $NUMBER. Nice job!"
 }
+
+
 
 
 NUMBER=$(( RANDOM % 10 + 1))
@@ -57,8 +57,7 @@ else
     #select games_played, guesses from users inner join games on users.id=games.user_id where username='pepe';
     GUESSES=$($PSQL "select max(guesses) from games inner join users on users.id=games.user_id where username='$USER' ")
     GAMES_PLAYED=$($PSQL "select max(games_played) from games inner join users on users.id=games.user_id where username='$USER' ")
-    echo -e "\nWelcome back, $USER! You have played $GAMES_PLAYED games, and your best game took $GUESSES guesses."
-   
+    echo -e "\nWelcome back, $USER! You have played $GAMES_PLAYED games, and your best game took $GUESSES guesses."   
     
     READ_NUMBER
     #Metemos en la tabla games nuevo registro con este usuario:
