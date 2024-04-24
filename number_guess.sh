@@ -27,7 +27,7 @@ READ_NUMBER() {
             fi
         done
         CONTA=$((CONTA+1))
-        echo -e "\nYou guessed it in $CONTA tries. The secret number was $NUMBER. Nice job!"
+        echo -e "You guessed it in $CONTA tries. The secret number was $NUMBER. Nice job!"
    else
         echo -e "\nThat is not an integer, guess again:"
         READ_NUMBER
@@ -35,44 +35,42 @@ READ_NUMBER() {
 }
 
 
+MAIN_FUNCTION() {
+
+    NUMBER=$(( RANDOM % 1000 + 1))
+
+    echo -e "\nEnter your username:\n"
+
+    read NAME
+
+    USER=$($PSQL "select username from users where username='$NAME'")
+
+    if [[ -z $USER ]]
+    then 
+        #Si no esta el usuario, lo metemos en la base de datos:     
+        INSERT_USER=$($PSQL "insert into users (username) values ('$NAME')")
+        echo -e "\nWelcome, $NAME! It looks like this is your first time here."
+        READ_NUMBER
+        #Metemos en la tabla games un nuevo registro con el numero de partidos jugados (en este caso 1 ya que es el primero), el numero de intentos y el user_id
+        INSERT_DATA=$($PSQL "insert into games (user_id, games_played, guesses) values ((select id from users where username='$NAME'),1,$CONTA)") 
+
+    #En caso de que el usuario ya este registrado en la base de datos, 
+    else 
+        #Sacamos el numero de partidas que lleva jugadas y la mejor puntuacion de todas las que lleva. 
+        #select games_played, guesses from users inner join games on users.id=games.user_id where username='pepe';
+        GUESSES=$($PSQL "select min(guesses) from games inner join users on users.id=games.user_id where username='$USER' ")
+        GAMES_PLAYED=$($PSQL "select max(games_played) from games inner join users on users.id=games.user_id where username='$USER' ")
+        echo -e "\nWelcome back, $USER! You have played $GAMES_PLAYED games, and your best game took $GUESSES guesses."       
+        READ_NUMBER
+        #Metemos en la tabla games nuevo registro con este usuario:
+        GAMES_PLAYED=$((GAMES_PLAYED+1))
+        INSERT_DATA=$($PSQL "insert into games (user_id, games_played, guesses) values ((select id from users where username='$NAME'),$GAMES_PLAYED,$CONTA)") 
+    fi
+}
 
 
-NUMBER=$(( RANDOM % 10 + 1))
 
-echo -e "\nEnter your username:\n"
-
-read NAME
-
-USER=$($PSQL "select username from users where username='$NAME'")
-
-if [[ -z $USER ]]
-then 
-    #Si no esta el usuario, lo metemos en la base de datos:     
-    INSERT_USER=$($PSQL "insert into users (username) values ('$NAME')")
-    echo -e "\nWelcome, $NAME! It looks like this is your first time here."
-
-    READ_NUMBER
-
-    #Metemos en la tabla games un nuevo registro con el numero de partidos jugados (en este caso 1 ya que es el primero), el numero de intentos y el user_id
-    INSERT_DATA=$($PSQL "insert into games (user_id, games_played, guesses) values ((select id from users where username='$NAME'),1,$CONTA)") 
-
-
-#En caso de que el usuario ya este registrado en la base de datos, 
-else 
-    #Sacamos el numero de partidas que lleva jugadas y la mejor puntuacion de todas las que lleva. 
-    #select games_played, guesses from users inner join games on users.id=games.user_id where username='pepe';
-    GUESSES=$($PSQL "select min(guesses) from games inner join users on users.id=games.user_id where username='$USER' ")
-    GAMES_PLAYED=$($PSQL "select max(games_played) from games inner join users on users.id=games.user_id where username='$USER' ")
-    echo -e "\nWelcome back, $USER! You have played $GAMES_PLAYED games, and your best game took $GUESSES guesses."   
-    
-    READ_NUMBER
-    #Metemos en la tabla games nuevo registro con este usuario:
-    GAMES_PLAYED=$((GAMES_PLAYED+1))
-    INSERT_DATA=$($PSQL "insert into games (user_id, games_played, guesses) values ((select id from users where username='$NAME'),$GAMES_PLAYED,$CONTA)") 
-
-fi
-
-
+MAIN_FUNCTION
 
 
 
