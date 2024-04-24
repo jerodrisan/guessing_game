@@ -8,24 +8,30 @@ READ_NUMBER() {
 
    echo -e "\nGuess the secret number between 1 and 1000:"
    read GUESS_NUMBER
-   CONTA=0 #creamos un contador para saber los intentos hasta que se adivina el numero:
-   while [[ $GUESS_NUMBER -ne $NUMBER ]]
-   do
-      if [[ $GUESS_NUMBER -gt $NUMBER ]]
-      then
-          CONTA=$((CONTA+1))
-          echo -e "\nIt's lower than that, guess again:"
-          read GUESS_NUMBER   
+   if [[ $GUESS_NUMBER =~ ^[0-9]+$ ]]
+   then     
+        CONTA=0 #creamos un contador para saber los intentos hasta que se adivina el numero:
+        while [[ $GUESS_NUMBER -ne $NUMBER ]]
+        do
+            if [[ $GUESS_NUMBER -gt $NUMBER ]]
+            then
+                CONTA=$((CONTA+1))
+                echo -e "\nIt's lower than that, guess again:"
+                read GUESS_NUMBER   
 
-      elif [[ $GUESS_NUMBER -lt $NUMBER ]]      
-      then       
-          CONTA=$((CONTA+1))
-          echo -e "\nIt's higher than that, guess again:"
-          read GUESS_NUMBER            
-      fi
-   done
-   CONTA=$((CONTA+1))
-   echo -e "\nYou guessed it in $CONTA tries. The secret number was $NUMBER. Nice job!"
+            elif [[ $GUESS_NUMBER -lt $NUMBER ]]      
+            then       
+                CONTA=$((CONTA+1))
+                echo -e "\nIt's higher than that, guess again:"
+                read GUESS_NUMBER            
+            fi
+        done
+        CONTA=$((CONTA+1))
+        echo -e "\nYou guessed it in $CONTA tries. The secret number was $NUMBER. Nice job!"
+   else
+        echo -e "\nThat is not an integer, guess again:"
+        READ_NUMBER
+   fi
 }
 
 
@@ -55,7 +61,7 @@ then
 else 
     #Sacamos el numero de partidas que lleva jugadas y la mejor puntuacion de todas las que lleva. 
     #select games_played, guesses from users inner join games on users.id=games.user_id where username='pepe';
-    GUESSES=$($PSQL "select max(guesses) from games inner join users on users.id=games.user_id where username='$USER' ")
+    GUESSES=$($PSQL "select min(guesses) from games inner join users on users.id=games.user_id where username='$USER' ")
     GAMES_PLAYED=$($PSQL "select max(games_played) from games inner join users on users.id=games.user_id where username='$USER' ")
     echo -e "\nWelcome back, $USER! You have played $GAMES_PLAYED games, and your best game took $GUESSES guesses."   
     
