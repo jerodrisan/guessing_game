@@ -54,9 +54,16 @@ then
 #En caso de que el usuario ya este registrado en la base de datos, 
 else 
     #Sacamos el numero de partidas que lleva jugadas y la mejor puntuacion de todas las que lleva. 
-    #echo -e "\nWelcome back, <username>! You have played <games_played> games, and your best game took <best_game> guesses."
-    echo -e "\nWelcome back, $USER guesses."
+    #select games_played, guesses from users inner join games on users.id=games.user_id where username='pepe';
+    GUESSES=$($PSQL "select max(guesses) from games inner join users on users.id=games.user_id where username='$USER' ")
+    GAMES_PLAYED=$($PSQL "select max(games_played) from games inner join users on users.id=games.user_id where username='$USER' ")
+    echo -e "\nWelcome back, $USER! You have played $GAMES_PLAYED games, and your best game took $GUESSES guesses."
+   
     
+    READ_NUMBER
+    #Metemos en la tabla games nuevo registro con este usuario:
+    GAMES_PLAYED=$((GAMES_PLAYED+1))
+    INSERT_DATA=$($PSQL "insert into games (user_id, games_played, guesses) values ((select id from users where username='$NAME'),$GAMES_PLAYED,$CONTA)") 
 
 fi
 
